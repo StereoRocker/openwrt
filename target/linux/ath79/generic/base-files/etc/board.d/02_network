@@ -45,6 +45,7 @@ ath79_setup_interfaces()
 	engenius,ecb600|\
 	enterasys,ws-ap3705i|\
 	extreme-networks,ws-ap3805i|\
+	fortinet,fap221b|\
 	glinet,gl-ar300m-lite|\
 	glinet,gl-usb150|\
 	hak5,wifi-pineapple-nano|\
@@ -673,6 +674,9 @@ ath79_setup_macs()
 		;;
 	enterasys,ws-ap3705i)
 		label_mac=$(mtd_get_mac_ascii u-boot-env0 ethaddr)
+		;;
+	fortinet,fap221b)
+		label_mac=$(mtd_get_mac_text_short u-boot 0x3ff80)
 		;;
 	hak5,lan-turtle|\
 	hak5,packet-squirrel)

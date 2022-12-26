@@ -274,6 +274,12 @@ define Build/eva-image
 	mv $@.new $@
 endef
 
+define Build/fortinet-image
+  mv $@ $(FORTINET_IMGNAME)
+  gzip $(FORTINET_IMGNAME)
+  mv $(FORTINET_IMGNAME).gz $@
+endef
+
 define Build/initrd_compression
 	$(if $(CONFIG_TARGET_INITRAMFS_COMPRESSION_BZIP2),.bzip2) \
 	$(if $(CONFIG_TARGET_INITRAMFS_COMPRESSION_GZIP),.gzip) \

@@ -14,8 +14,10 @@ case "$FIRMWARE" in
 		;;
 	asus,pl-ac56|\
 	asus,rp-ac51|\
-	asus,rp-ac66)
+	asus,rp-ac66|\
+	fortinet,fap221b)
 		caldata_extract "art" 0x1000 0x440
+		ath9k_patch_mac $(macaddr_add $(mtd_get_mac_text_short u-boot 0x3ff80) 1)
 		;;
 	avm,fritz1750e|\
 	avm,fritz4020|\
@@ -97,6 +99,10 @@ case "$FIRMWARE" in
 	enterasys,ws-ap3705i)
 		caldata_extract "calibrate" 0x5000 0x440
 		ath9k_patch_mac $(mtd_get_mac_ascii u-boot-env0 RADIOADDR0)
+		;;
+	fortinet,fap221b)
+		caldata_extract "art" 0x5000 0x440
+		ath9k_patch_mac $(macaddr_add $(mtd_get_mac_text_short u-boot 0x3ff80) 2)
 		;;
 	meraki,mr12)
 		caldata_extract "art" 0x11000 0xeb8

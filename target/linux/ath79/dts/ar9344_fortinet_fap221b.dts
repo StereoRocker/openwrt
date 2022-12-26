@@ -1,0 +1,207 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "ar9344.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	compatible = "fortinet,fap221b", "qca,ar9344";
+	model = "Fortinet FAP221B";
+
+	chosen {
+		bootargs = "console=ttyS0,9600n8";
+	};
+
+	aliases {
+		led-boot = &led_power_green;
+		led-failsafe = &led_power_red;
+		led-running = &led_power_green;
+		led-upgrade = &led_power_red;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&enable_gpio_12 &enable_gpio_13 &enable_gpio_17 &enable_gpio_18 &enable_gpio_19>;
+
+		led_power_green: power_green {
+			label = "green:power";
+			gpios = <&gpio 12 GPIO_ACTIVE_LOW>;
+		};
+
+		led_power_red: power_red {
+			label = "red:power";
+			gpios = <&gpio 13 GPIO_ACTIVE_LOW>;
+		};
+
+        lan_green {
+			label = "green:lan";
+			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+
+		lan_red {
+			label = "red:lan";
+			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
+		};
+
+		wifi_green {
+			label = "green:radio2";
+			gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy0tpt";
+		};
+
+		wifi_red {
+			label = "red:radio2";
+			gpios = <&gpio 19 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy1tpt";
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "Reset button";
+			linux,code = <KEY_RESTART>;
+			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	virtual_flash {
+		compatible = "mtd-concat";
+		devices = <&fwconcat0 &fwconcat1>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				reg = <0x0 0x0>;
+				label = "firmware";
+				compatible = "openwrt,uimage";
+			};
+		};
+	};
+};
+
+&ref {
+	clock-frequency = <25000000>;
+};
+
+
+&pinmux {
+    enable_gpio_12: pinmux_enable_gpio_12 {
+        pinctrl-single,bits = <0xc 0x0 0x000000ff>;
+    };
+
+    enable_gpio_13: pinmux_enable_gpio_13 {
+        pinctrl-single,bits = <0xc 0x0 0x0000ff00>;
+    };
+
+    enable_gpio_17: pinmux_enable_gpio_17 {
+		pinctrl-single,bits = <0x10 0x0 0x0000ff00>;
+	};
+
+    enable_gpio_18: pinmux_enable_gpio_18 {
+		pinctrl-single,bits = <0x10 0x0 0x00ff0000>;
+	};
+
+    enable_gpio_19: pinmux_enable_gpio_19 {
+		pinctrl-single,bits = <0x10 0x0 0xff000000>;
+	};
+	
+};
+
+&wmac {
+	status = "okay";
+	qca,no-eeprom;
+};
+
+&spi {
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <12500000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x000000 0x40000>;
+				read-only;
+			};
+
+			fwconcat1: partition@40000 {
+				label = "rootfs";
+				reg = <0x40000 0x900000>;
+			};
+
+			fwconcat0: partition@940000 {
+				label = "kernel";
+				reg = <0x940000 0x6B0000>;
+			};
+
+			partition@FF0000 {
+				label = "art";
+				reg = <0xff0000 0x00010000>;
+				read-only;
+			};
+		};
+	};
+};
+
+&pcie {
+	status = "okay";
+
+	ath9k0: wifi@0,0 {
+		compatible = "pci168c,0033";
+		reg = <0x0000 0 0 0 0>;
+		qca,no-eeprom;
+		#gpio-cells = <2>;
+		gpio-controller;
+	};
+
+	ath9k1: wifi@1,0 {
+		compatible = "pci168c,0030";
+		reg = <0x0000 0 0 0 0>;
+		qca,no-eeprom;
+		#gpio-cells = <2>;
+		gpio-controller;
+	};
+};
+
+&mdio0 {
+	status = "okay";
+
+	phy0: ethernet-phy@0 {
+		reg = <0>;
+	};
+};
+
+&eth0 {
+	status = "okay";
+
+	pll-data = <0x1e000000 0x08000101 0x08001313>;
+
+	phy-mode = "rgmii";
+	phy-handle = <&phy0>;
+
+	gmac-config {
+		device = <&gmac>;
+		rgmii-gmac0 = <1>;
+		rxd-delay = <0>;
+		rxdv-delay = <0>;
+		txen-delay = <0>;
+		txd-delay = <0>;
+	};
+};

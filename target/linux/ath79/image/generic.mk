@@ -1324,6 +1324,19 @@ define Device/extreme-networks_ws-ap3805i
 endef
 TARGET_DEVICES += extreme-networks_ws-ap3805i
 
+define Device/fortinet_fap221b
+  SOC := ar9344
+  DEVICE_VENDOR := Fortinet
+  DEVICE_MODEL := FAP221B
+  SUPPORTED_DEVICES += fap221b
+  FORTINET_IMGNAME := FP221B
+  IMAGE_SIZE := 16064k
+  IMAGES += factory.bin sysupgrade.bin
+  IMAGE/factory.bin := append-rootfs | pad-rootfs | pad-to 9216k | append-kernel | pad-to 64k | fortinet-image
+  IMAGE/sysupgrade.bin := append-kernel | pad-to 6848k | append-rootfs | pad-rootfs | append-metadata
+endef
+TARGET_DEVICES += fortinet_fap221b
+
 define Device/glinet_6408
   $(Device/tplink-8mlzma)
   SOC := ar9331
